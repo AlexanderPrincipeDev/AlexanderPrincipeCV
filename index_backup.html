@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexander Principe Tolentino - CV</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Basic reset and body styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            overflow-x: hidden;
+        }
+
+        /* Login Screen Styles */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .auth-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s ease, transform 0.2s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .auth-input.error {
+            border-color: #e53e3e;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-button:active {
+            transform: translateY(0);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff40;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide main content initially */
+        .main-app {
+            display: none !important;
+        }
+
+        .main-app.authenticated {
+            display: block !important;
+        }
+
+        /* Ensure auth overlay is visible by default */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .auth-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Floating particles for auth screen */
+        .auth-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .auth-particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .auth-particle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 10%;
+            top: 20%;
+            animation-delay: 0s;
+        }
+
+        .auth-particle:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            left: 20%;
+            top: 80%;
+            animation-delay: 1s;
+        }
+
+        .auth-particle:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            left: 70%;
+            top: 10%;
+            animation-delay: 2s;
+        }
+
+        .auth-particle:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            left: 80%;
+            top: 70%;
+            animation-delay: 3s;
+        }
+
+        .auth-particle:nth-child(5) {
+            width: 50px;
+            height: 50px;
+            left: 50%;
+            top: 50%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Screen -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-particles">
+            <div class="auth-particle"></div>
+            <div class="auth-particle"></div>
+            <div class="auth-particle"></div>
+            <div class="auth-particle"></div>
+            <div class="auth-particle"></div>
+        </div>
+        <div class="auth-card">
+            <div class="auth-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h1 class="auth-title">Acceso Restringido</h1>
+            <p class="auth-subtitle">Ingresa el código de acceso para ver el CV profesional</p>
+            <form id="authForm">
+                <input 
+                    type="password" 
+                    id="accessCode" 
+                    class="auth-input" 
+                    placeholder="Código de acceso"
+                    maxlength="18"
+                    autocomplete="off"
+                >
+                <div class="error-message" id="errorMessage">
+                    Código incorrecto. Inténtalo de nuevo.
+                </div>
+                <button type="submit" class="auth-button" id="authButton">
+                    <span id="buttonText">Acceder</span>
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Content -->
+    <div class="main-app" id="mainApp">
+    <div class="container">
+        <!-- Animated Background -->
+        <div class="animated-bg">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+                <div class="shape shape-5"></div>
+            </div>
+        </div>
+
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <div class="profile-section">
+                    <div class="profile-avatar">
+                        <div class="avatar-placeholder">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="status-indicator"></div>
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="name">
+                            <span class="first-name">Alexander</span>
+                            <span class="last-name">Principe Tolentino</span>
+                        </h1>
+                        <h2 class="title">Senior Fullstack Developer</h2>
+                        <p class="subtitle">Master en Dirección de Sistemas y TI | 5+ años de experiencia</p>
+                        <div class="tech-stack">
+                            <span class="tech-chip">JavaScript</span>
+                            <span class="tech-chip">Angular</span>
+                            <span class="tech-chip">Vue.js</span>
+                            <span class="tech-chip">Java</span>
+                            <span class="tech-chip">Spring Boot</span>
+                            <span class="tech-chip">Cells</span>
+                            <span class="tech-chip">SQL</span>
+                            <span class="tech-chip">SMPC®</span>
+                            <span class="tech-chip">SFPC™</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-section">
+                    <div class="contact-grid">
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <span class="contact-label">Ubicación</span>
+                                <span class="contact-value">Lima, Perú</span>
+                            </div>
+                        </div>
+                        <a href="https://www.linkedin.com/in/alexander-principe-tolentino/" target="_blank" rel="noopener noreferrer" class="contact-item contact-link">
+                            <div class="contact-icon">
+                                <i class="fab fa-linkedin"></i>
+                            </div>
+                            <div class="contact-details">
+                                <span class="contact-label">LinkedIn</span>
+                                <span class="contact-value">alexander-principe-tolentino</span>
+                            </div>
+                        </a>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <div class="contact-details">
+                                <span class="contact-label">GitHub</span>
+                                <span class="contact-value">alexander-principe</span>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <span class="contact-label">Email</span>
+                                <span class="contact-value">principetolentinoa@gmail.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Column: About + Experience Timeline -->
+            <div class="main-column">
+                <!-- About Section -->
+                <section class="section about-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-user-astronaut"></i>
+                            Perfil Profesional
+                        </h3>
+                    </div>
+                    <div class="about-content">
+                        <p class="about-text">
+                            <strong>Bachiller en Ingeniería de Sistemas de la Universidad de Lima</strong> con <strong>más de 5 años de experiencia</strong> como <strong>Fullstack Developer</strong>. 
+                            Actualmente cursando <strong>Maestría en Dirección de Sistemas y TI en la UPC</strong>. Especializado en desarrollo 
+                            con <strong>Angular, Vue.js, Cells y Spring Boot</strong>. Experiencia comprobada en proyectos enterprise, metodologías ágiles 
+                            y arquitecturas de microservicios. <strong>Ex Mentor</strong> en Laboratoria y <strong>ganador de múltiples hackathones</strong>.
+                        </p>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">5+</div>
+                                <div class="stat-label">Años de Experiencia</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">7</div>
+                                <div class="stat-label">Empresas Trabajadas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">5</div>
+                                <div class="stat-label">Hackathons Participados</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">20+</div>
+                                <div class="stat-label">Tecnologías Dominadas</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Experience Timeline Section - MAIN FOCUS -->
+                <section class="section experience-section main-timeline">
+                    <div class="section-header">
+                        <h3 class="section-title main-title">
+                            <i class="fas fa-rocket"></i>
+                            Trayectoria Profesional
+                        </h3>
+                        <p class="timeline-subtitle">Mi evolución como desarrollador a través de empresas líderes en tecnología</p>
+                    </div>
+                    
+                    <div class="timeline-container">
+                        <div class="timeline-line"></div>
+                    
+                    <!-- BBVA -->
+                    <div class="timeline-item" data-year="2023">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card current">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Software Analyst Solutions Development</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            BBVA en Perú
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Feb 2023 - Actualidad</span>
+                                        <span class="job-duration">2 años 6 meses</span>
+                                        <span class="job-type">Híbrido</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <div class="job-areas">
+                                        <span class="area-tag">Engineering</span>
+                                        <span class="area-tag">Finance Factory</span>
+                                        <span class="area-tag">Reliability</span>
+                                        <span class="area-tag">Proyectos</span>
+                                    </div>
+                                    <ul class="achievements">
+                                        <li>Desarrollo de soluciones enterprise con Vue.js, React.js, Angular, Cells y Java</li>
+                                        <li>Automatización de procesos con Jobs y Quartz</li>
+                                        <li>Gestión de bases de datos PostgreSQL y Oracle</li>
+                                    </ul>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">Vue.js</span>
+                                    <span class="tech-tag">React.js</span>
+                                    <span class="tech-tag">Angular</span>
+                                    <span class="tech-tag">Java 17</span>
+                                    <span class="tech-tag">Spring Boot</span>
+                                    <span class="tech-tag">PostgreSQL</span>
+                                    <span class="tech-tag">Oracle</span>
+                                    <span class="tech-tag">Microservicios</span>
+                                    <span class="tech-tag">Quartz</span>
+                                    <span class="tech-tag">JBoss</span>
+                                    <span class="tech-tag">Cells</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stefanini -->
+                    <div class="timeline-item" data-year="2022">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Fullstack Developer</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            Stefanini LATAM
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Sept 2022 - Feb 2023</span>
+                                        <span class="job-duration">6 meses</span>
+                                        <span class="job-type">Presencial</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <div class="project-info">
+                                        <i class="fas fa-project-diagram"></i>
+                                        <span>Proyecto con la empresa Linde</span>
+                                    </div>
+                                    <ul class="achievements">
+                                        <li>Desarrollo de módulos web: Facturación, Inventario, Ventas</li>
+                                        <li>Creación de servicios REST con Node.js</li>
+                                        <li>Implementación de código limpio y buenas prácticas</li>
+                                        <li>Trabajo colaborativo en equipo ágil</li>
+                                    </ul>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">Node.js</span>
+                                    <span class="tech-tag">Angular</span>
+                                    <span class="tech-tag">Angular Material</span>
+                                    <span class="tech-tag">CSS</span>
+                                    <span class="tech-tag">HTML5</span>
+                                    <span class="tech-tag">Angular CLI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indra -->
+                    <div class="timeline-item" data-year="2021">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Frontend Developer</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            Indra
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Nov 2021 - Sept 2022</span>
+                                        <span class="job-duration">11 meses</span>
+                                        <span class="job-type">Presencial</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <div class="project-info">
+                                        <i class="fas fa-project-diagram"></i>
+                                        <span>Proyecto Visor en Telefónica del Perú</span>
+                                    </div>
+                                    <ul class="achievements">
+                                        <li>Desarrollo de funcionalidades para aplicación web Visor</li>
+                                        <li>Implementación de testing y CI/CD con Jenkins</li>
+                                        <li>Integración con SonarQube para calidad de código</li>
+                                        <li>Metodologías ágiles y trabajo colaborativo</li>
+                                    </ul>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">Angular</span>
+                                    <span class="tech-tag">TypeScript</span>
+                                    <span class="tech-tag">Angular Material</span>
+                                    <span class="tech-tag">Redux</span>
+                                    <span class="tech-tag">Jenkins</span>
+                                    <span class="tech-tag">SonarQube</span>
+                                    <span class="tech-tag">Testing</span>
+                                    <span class="tech-tag">GitFlow</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Telefónica (Fullstack) -->
+                    <div class="timeline-item" data-year="2020">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Fullstack Developer</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            Telefónica
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Nov 2020 - Oct 2021</span>
+                                        <span class="job-duration">1 año</span>
+                                        <span class="job-type">Presencial</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <div class="modules-developed">
+                                        <h5>Módulos Desarrollados:</h5>
+                                        <div class="modules-grid">
+                                            <span class="module-item">Módulo Embajador</span>
+                                            <span class="module-item">YoTeAyudo</span>
+                                            <span class="module-item">Planes Movistar</span>
+                                            <span class="module-item">Formación Telefónica Hispam</span>
+                                            <span class="module-item">Herramientas Telefónica Hispam</span>
+                                            <span class="module-item">Web de valoración de cargo Hispam</span>
+                                        </div>
+                                    </div>
+                                    <div class="special-role">
+                                        <i class="fas fa-trophy"></i>
+                                        <span>Asesor del equipo Movistar Challenge 2021 - Contratos Terceros</span>
+                                    </div>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">Angular</span>
+                                    <span class="tech-tag">Spring Boot</span>
+                                    <span class="tech-tag">RxJs</span>
+                                    <span class="tech-tag">Azure</span>
+                                    <span class="tech-tag">Docker</span>
+                                    <span class="tech-tag">JUnit</span>
+                                    <span class="tech-tag">Karma</span>
+                                    <span class="tech-tag">SQL</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interseguro -->
+                    <div class="timeline-item" data-year="2020">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Practicante de Desarrollo Web</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            Interseguro Compañía de Seguros
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Abr 2020 - Nov 2020</span>
+                                        <span class="job-duration">8 meses</span>
+                                        <span class="job-type">Prácticas</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <ul class="achievements">
+                                        <li>Desarrollo de soluciones en Java y JavaScript para productos digitales</li>
+                                        <li>Creación de APIs reutilizables para diferentes áreas</li>
+                                        <li>Optimización de aplicaciones para velocidad y escalabilidad</li>
+                                        <li>Participación en ceremonias Scrum y metodologías ágiles</li>
+                                        <li>Generación de código reutilizable para uso futuro</li>
+                                    </ul>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">Vue.js</span>
+                                    <span class="tech-tag">Nuxt.js</span>
+                                    <span class="tech-tag">Spring Boot</span>
+                                    <span class="tech-tag">MongoDB</span>
+                                    <span class="tech-tag">Nginx</span>
+                                    <span class="tech-tag">SASS</span>
+                                    <span class="tech-tag">REST API</span>
+                                    <span class="tech-tag">Git</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Telefónica (Practicante Proyectos) -->
+                    <div class="timeline-item" data-year="2019">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Practicante del Área de Proyectos</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            Telefónica (Movistar Challenge 2019)
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Ago 2019 - Ene 2020</span>
+                                        <span class="job-duration">6 meses</span>
+                                        <span class="job-type">Prácticas</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <div class="special-achievement">
+                                        <i class="fas fa-medal"></i>
+                                        <span>Proyecto: Automatización del cálculo del nuevo modelo de pago del contrato Bucle</span>
+                                    </div>
+                                    <ul class="achievements">
+                                        <li>Automatización del cálculo del nuevo modelo de pago del contrato Bucle</li>
+                                        <li>Documentación completa del nuevo modelo de pago</li>
+                                        <li>Optimización de código SQL para mejor rendimiento</li>
+                                        <li>Manejo y análisis de KPI's empresariales</li>
+                                        <li>Aplicación de Metodologías Ágiles (SCRUM)</li>
+                                    </ul>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">SQL</span>
+                                    <span class="tech-tag">PL/SQL</span>
+                                    <span class="tech-tag">SCRUM</span>
+                                    <span class="tech-tag">KPI Management</span>
+                                    <span class="tech-tag">Automatización</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claro -->
+                    <div class="timeline-item" data-year="2018">
+                        <div class="timeline-marker">
+                            <div class="marker-inner"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="job-card">
+                                <div class="job-header">
+                                    <div class="company-info">
+                                        <h4 class="job-title">Practicante del Área de Tráfico y Evaluación del Desempeño</h4>
+                                        <div class="company-name">
+                                            <i class="fas fa-building"></i>
+                                            Claro Perú
+                                        </div>
+                                    </div>
+                                    <div class="job-meta">
+                                        <span class="job-period">Sept 2018 - Mar 2019</span>
+                                        <span class="job-duration">7 meses</span>
+                                        <span class="job-type">Prácticas</span>
+                                    </div>
+                                </div>
+                                <div class="job-description">
+                                    <ul class="achievements">
+                                        <li>Automatización de reportes utilizando SQL, PL/SQL y macros</li>
+                                        <li>Medición de calidad del servicio móvil en campo</li>
+                                        <li>Seguimiento de actividades con múltiples áreas</li>
+                                        <li>Automatización de procesos empresariales</li>
+                                        <li>Documentación técnica de procesos</li>
+                                        <li>Reportes para cumplimiento regulatorio (Osiptel, MTC)</li>
+                                    </ul>
+                                </div>
+                                <div class="tech-stack-job">
+                                    <span class="tech-tag">SQL</span>
+                                    <span class="tech-tag">PL/SQL</span>
+                                    <span class="tech-tag">Macros</span>
+                                    <span class="tech-tag">Automatización</span>
+                                    <span class="tech-tag">Reportes</span>
+                                    <span class="tech-tag">QA Testing</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Sidebar: Skills, Education, etc. -->
+            <div class="sidebar-column">
+                <!-- Skills Section -->
+                <section class="section skills-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-code"></i>
+                            Stack Tecnológico
+                        </h3>
+                    </div>
+                    
+                    <div class="skills-container">
+                        <div class="skills-category">
+                            <h4 class="skills-subtitle">
+                                <i class="fab fa-js-square"></i>
+                                Frontend
+                            </h4>
+                            <div class="skills-list">
+                                <div class="skill-item">
+                                    <span class="skill-name">Angular</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 95%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">Vue.js</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 90%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">React.js</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 85%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">TypeScript</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 90%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">JavaScript</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 95%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="skills-category">
+                            <h4 class="skills-subtitle">
+                                <i class="fas fa-server"></i>
+                                Backend
+                            </h4>
+                            <div class="skills-list">
+                                <div class="skill-item">
+                                    <span class="skill-name">Java 11/17</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 90%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">Spring Boot</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 90%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">Node.js</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 85%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">Python</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 75%"></div>
+                                    </div>
+                                </div>
+                                <div class="skill-item">
+                                    <span class="skill-name">Microservicios</span>
+                                    <div class="skill-bar">
+                                        <div class="skill-progress" style="--progress: 85%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="skills-category">
+                            <h4 class="skills-subtitle">
+                                <i class="fas fa-database"></i>
+                                Bases de Datos
+                            </h4>
+                            <div class="skills-grid">
+                                <span class="skill-chip">Oracle</span>
+                                <span class="skill-chip">PostgreSQL</span>
+                                <span class="skill-chip">SQL Server</span>
+                                <span class="skill-chip">MySQL</span>
+                                <span class="skill-chip">MongoDB</span>
+                            </div>
+                        </div>
+
+                        <div class="skills-category">
+                            <h4 class="skills-subtitle">
+                                <i class="fas fa-cloud"></i>
+                                DevOps & Cloud
+                            </h4>
+                            <div class="skills-grid">
+                                <span class="skill-chip">Docker</span>
+                                <span class="skill-chip">Azure</span>
+                                <span class="skill-chip">AWS</span>
+                                <span class="skill-chip">Jenkins</span>
+                                <span class="skill-chip">Git</span>
+                                <span class="skill-chip">SonarQube</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Education Section -->
+                <section class="section education-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            Formación Académica
+                        </h3>
+                    </div>
+                    
+                    <div class="education-timeline">
+                        <div class="education-item">
+                            <div class="education-icon">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="education-content">
+                                <h4 class="degree">Master en Dirección de Sistemas y TI</h4>
+                                <div class="institution">Postgrado UPC</div>
+                                <div class="education-period">2024 - 2026</div>
+                                <div class="education-status">En Curso</div>
+                            </div>
+                        </div>
+
+                        <div class="education-item">
+                            <div class="education-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="education-content">
+                                <h4 class="degree">Bachiller en Ingeniería de Sistemas</h4>
+                                <div class="institution">Universidad de Lima</div>
+                                <div class="education-period">2014 - 2020</div>
+                                <div class="education-status">Completado</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Certifications Section -->
+                <section class="section certifications-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-certificate"></i>
+                            Certificaciones
+                        </h3>
+                    </div>
+                    
+                    <div class="certifications-grid">
+                        <div class="cert-card">
+                            <div class="cert-icon">
+                                <i class="fas fa-award"></i>
+                            </div>
+                            <div class="cert-content">
+                                <h4 class="cert-name">SMPC®</h4>
+                                <div class="cert-full-name">Scrum Master Professional Certificate</div>
+                                <div class="cert-issuer">CertiProf</div>
+                                <div class="cert-date">Nov 2022</div>
+                            </div>
+                        </div>
+
+                        <div class="cert-card">
+                            <div class="cert-icon">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <div class="cert-content">
+                                <h4 class="cert-name">SFPC™</h4>
+                                <div class="cert-full-name">Scrum Foundations Professional Certificate</div>
+                                <div class="cert-issuer">CertiProf</div>
+                                <div class="cert-date">Jun 2020</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Awards Section -->
+                <section class="section awards-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-trophy"></i>
+                            Logros & Reconocimientos
+                        </h3>
+                    </div>
+                    
+                    <div class="awards-timeline">
+                        <div class="award-item gold">
+                            <div class="award-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="award-content">
+                                <h4 class="award-name">Hackathon WeCode BBVA 2022</h4>
+                                <div class="award-position">Top 3</div>
+                                <div class="award-description">
+                                    Aplicación web para mostrar aforo en tiempo real usando OpenCV y Angular
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="award-item bronze">
+                            <div class="award-icon">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <div class="award-content">
+                                <h4 class="award-name">Hackathon Intercorp 2021</h4>
+                                <div class="award-position">3er Puesto</div>
+                            </div>
+                        </div>
+
+                        <div class="award-item silver">
+                            <div class="award-icon">
+                                <i class="fas fa-award"></i>
+                            </div>
+                            <div class="award-content">
+                                <h4 class="award-name">Movistar Challenge 2019</h4>
+                                <div class="award-position">2do Puesto</div>
+                            </div>
+                        </div>
+
+                        <div class="award-item">
+                            <div class="award-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="award-content">
+                                <h4 class="award-name">Hackathon BBVA 2021</h4>
+                                <div class="award-position">Participante</div>
+                            </div>
+                        </div>
+
+                        <div class="award-item">
+                            <div class="award-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="award-content">
+                                <h4 class="award-name">Hackathon Bicentenario ESAN 2021</h4>
+                                <div class="award-position">Participante</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Volunteer Section -->
+                <section class="section volunteer-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-heart"></i>
+                            Voluntariado & Mentoring
+                        </h3>
+                    </div>
+                    
+                    <div class="volunteer-card">
+                        <div class="volunteer-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="volunteer-content">
+                            <h4 class="volunteer-role">Ex-Mentor de Estudiantes</h4>
+                            <div class="volunteer-org">Laboratoria</div>
+                            <div class="volunteer-period">Ago 2024 - Dic 2024</div>
+                            <div class="volunteer-description">
+                                Mentor comprometido que apoyó el desarrollo de alumnas en su camino 
+                                a convertirse en Frontend Developers
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>&copy; 2025 Alexander Principe Tolentino. Todos los derechos reservados.</p>
+                </div>
+                <div class="footer-right">
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    </div>
+
+    <script>
+        // Debug logs
+        console.log('Script loaded');
+        
+        // Authentication System
+        const CORRECT_CODE = '112233445566778899';
+        
+        const authOverlay = document.getElementById('authOverlay');
+        const mainApp = document.getElementById('mainApp');
+        const authForm = document.getElementById('authForm');
+        const accessCodeInput = document.getElementById('accessCode');
+        const errorMessage = document.getElementById('errorMessage');
+        const authButton = document.getElementById('authButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        console.log('Elements found:', {
+            authOverlay: !!authOverlay,
+            mainApp: !!mainApp,
+            authForm: !!authForm
+        });
+
+        // Check if user is already authenticated
+        function checkAuthentication() {
+            const isAuthenticated = sessionStorage.getItem('cvAuthenticated');
+            console.log('Authentication check:', isAuthenticated);
+            if (isAuthenticated === 'true') {
+                showMainApp();
+            } else {
+                // Ensure auth screen is visible
+                if (authOverlay) {
+                    authOverlay.style.display = 'flex';
+                    authOverlay.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Show main app and hide auth overlay
+        function showMainApp() {
+            console.log('Showing main app');
+            if (authOverlay) {
+                authOverlay.classList.add('hidden');
+            }
+            if (mainApp) {
+                mainApp.classList.add('authenticated');
+            }
+            
+            // Start main app animations after auth overlay is hidden
+            setTimeout(() => {
+                initializeMainApp();
+            }, 500);
+        }
+
+        // Show error message
+        function showError() {
+            if (accessCodeInput) {
+                accessCodeInput.classList.add('error');
+            }
+            if (errorMessage) {
+                errorMessage.classList.add('show');
+            }
+            
+            setTimeout(() => {
+                if (accessCodeInput) {
+                    accessCodeInput.classList.remove('error');
+                }
+                if (errorMessage) {
+                    errorMessage.classList.remove('show');
+                }
+            }, 3000);
+        }
+
+        // Show loading state
+        function showLoading() {
+            if (authButton) {
+                authButton.disabled = true;
+            }
+            if (buttonText) {
+                buttonText.style.display = 'none';
+            }
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'block';
+            }
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            if (authButton) {
+                authButton.disabled = false;
+            }
+            if (buttonText) {
+                buttonText.style.display = 'inline';
+            }
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Handle form submission
+        if (authForm) {
+            authForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form submitted');
+                
+                const enteredCode = accessCodeInput ? accessCodeInput.value.trim() : '';
+                
+                if (!enteredCode) {
+                    showError();
+                    return;
+                }
+
+                showLoading();
+
+                // Simulate authentication delay for better UX
+                setTimeout(() => {
+                    if (enteredCode === CORRECT_CODE) {
+                        console.log('Authentication successful');
+                        sessionStorage.setItem('cvAuthenticated', 'true');
+                        hideLoading();
+                        showMainApp();
+                    } else {
+                        console.log('Authentication failed');
+                        hideLoading();
+                        showError();
+                        if (accessCodeInput) {
+                            accessCodeInput.value = '';
+                        }
+                    }
+                }, 1000);
+            });
+        }
+
+        // Clear error state when user starts typing
+        if (accessCodeInput) {
+            accessCodeInput.addEventListener('input', function() {
+                this.classList.remove('error');
+                if (errorMessage) {
+                    errorMessage.classList.remove('show');
+                }
+            });
+        }
+
+        // Initialize main app functionality
+        function initializeMainApp() {
+            // Intersection Observer for timeline animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe timeline items
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                observer.observe(item);
+            });
+
+            // Animate skill bars
+            const skillObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const skillBars = entry.target.querySelectorAll('.skill-progress');
+                        skillBars.forEach(bar => {
+                            bar.style.width = bar.style.getPropertyValue('--progress');
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.skills-section').forEach(section => {
+                skillObserver.observe(section);
+            });
+
+            // Floating shapes animation
+            function animateShapes() {
+                const shapes = document.querySelectorAll('.shape');
+                shapes.forEach((shape, index) => {
+                    const delay = index * 2000;
+                    setTimeout(() => {
+                        shape.style.animationPlayState = 'running';
+                    }, delay);
+                });
+            }
+
+            // Start animations
+            animateShapes();
+            document.body.classList.add('loaded');
+
+            // Smooth scrolling for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            checkAuthentication();
+        });
+
+        // Fallback: Check again when window loads
+        window.addEventListener('load', function() {
+            console.log('Window Loaded');
+            checkAuthentication();
+        });
+
+        // Optional: Add keyboard shortcut for development (Ctrl+Shift+D)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                sessionStorage.setItem('cvAuthenticated', 'true');
+                showMainApp();
+            }
+        });
+
+        // Clear authentication on page unload (optional security measure)
+        window.addEventListener('beforeunload', function() {
+            // Uncomment the line below if you want to require re-authentication on every visit
+            // sessionStorage.removeItem('cvAuthenticated');
+        });
+    </script>
+</body>
+</html>
